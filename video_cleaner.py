@@ -8,6 +8,7 @@ import numpy as np
 
 from src.FrameFilter import FrameFilter
 from src.FrameOrderer import FrameOrderer
+from src.encoders.DinoEncoder import DinoEncoder
 from src.encoders.OrbEncoder import OrbEncoder
 from src.encoders.VitEncoder import VitEncoder
 
@@ -18,10 +19,9 @@ def create_arg_parser():
         description='This program cleans and order a video',
     )
     parser.add_argument('filename', type=str, help="Path to the file to be read")
-    parser.add_argument("-e", "--encoder", help="Which encoder to use (vit, orb)", default="vit")
+    parser.add_argument("-e", "--encoder", help="Which encoder to use (vit, orb, dino)", default="vit")
     parser.add_argument("-o", "--output", help="path of the output video", default="cleaned_video.mp4")
     parser.add_argument("-d", "--dir", help="path of the rejected frames dir", default="rejected_frames")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     return parser
 
 def load_frames_from_video(video_path, resize: Optional[Tuple]=None):
@@ -72,7 +72,8 @@ def write_rejected_frames(frames, directory):
 def main():
     encoders = {
         'vit': VitEncoder,
-        'orb': OrbEncoder
+        'orb': OrbEncoder,
+        "dino": DinoEncoder
     }
     args = create_arg_parser().parse_args()
     if not args.filename:
@@ -80,11 +81,11 @@ def main():
         raise Exception("No filename provided")
     print(f"Loading video {args.filename}")
     frames, fps = load_frames_from_video(args.filename)
-    if args.encoder not in ['vit', 'orb']:
+    if args.encoder not in encoders.keys():
         raise Exception(f"Unknown encoder {args.encoder}")
     print(f"Loading encoder {args.encoder}")
     encoder = encoders[args.encoder]()
-    print("Extracting frames's features")
+    print("Extracting frame's features")
     features = np.array([encoder.encode(frame) for frame in frames])
 
     # Here I release the encoder so save ram

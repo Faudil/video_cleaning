@@ -1,8 +1,4 @@
-from typing import Callable
-
 import networkx as nx
-from networkx.algorithms.approximation.traveling_salesman import greedy_tsp, christofides, threshold_accepting_tsp
-from sklearn.metrics.pairwise import cosine_distances
 from numpy import dot
 from numpy.linalg import norm
 
@@ -11,12 +7,6 @@ def cosine_similarity(a, b):
     return dot(a, b) / (norm(a) * norm(b))
 
 class FrameOrderer:
-    def __init__(self, distance_function: Callable = cosine_distances):
-        self.__distance_function = distance_function
-        self.methods = [
-            greedy_tsp,
-            christofides,
-        ]
 
     def _build_graph(self, features):
         """
@@ -32,7 +22,7 @@ class FrameOrderer:
         return graph
 
     def _find_shortest_path(self, graph):
-            return nx.algorithms.approximation.traveling_salesman_problem(graph, cycle=False)
+        return nx.algorithms.approximation.traveling_salesman_problem(graph, cycle=False)
 
     def order_frames(self, features):
         graph = self._build_graph(features)
